@@ -1,11 +1,10 @@
 package zap
 
 import (
-	"go.uber.org/atomic"
-	"go.uber.org/zap"
-
 	"github.com/yimi-go/keeper"
 	"github.com/yimi-go/logging"
+	"go.uber.org/atomic"
+	"go.uber.org/zap"
 )
 
 type zapFactory struct {

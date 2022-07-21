@@ -3,10 +3,9 @@ package zap
 import (
 	"strings"
 
+	"github.com/yimi-go/logging"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-
-	"github.com/yimi-go/logging"
 )
 
 type FieldKeys struct {

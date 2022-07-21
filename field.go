@@ -4,10 +4,9 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/yimi-go/logging"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-
-	"github.com/yimi-go/logging"
 )
 
 func mapZapField(field logging.Field) zapcore.Field {

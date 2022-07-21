@@ -3,9 +3,8 @@ package zap
 import (
 	"fmt"
 
-	"go.uber.org/zap/zapcore"
-
 	"github.com/yimi-go/logging"
+	"go.uber.org/zap/zapcore"
 )
 
 type zapLogger struct {

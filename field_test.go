@@ -11,10 +11,9 @@ import (
 	"unsafe"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/yimi-go/logging"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-
-	"github.com/yimi-go/logging"
 )
 
 type hanBool bool
