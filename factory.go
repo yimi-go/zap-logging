@@ -4,12 +4,13 @@ import (
 	"go.uber.org/atomic"
 	"go.uber.org/zap"
 
+	"github.com/yimi-go/keeper"
 	"github.com/yimi-go/logging"
 )
 
 type zapFactory struct {
 	options atomic.Value
-	zlCache atomic.Value
+	zlCache keeper.Keeper[string, *zap.Logger]
 }
 
 func NewFactory(options *Options) *zapFactory {
@@ -19,7 +20,9 @@ func NewFactory(options *Options) *zapFactory {
 	options = options.Defaulted()
 	zf := &zapFactory{}
 	zf.options.Store(options)
-	zf.zlCache.Store(map[string]*zap.Logger{})
+	zf.zlCache = keeper.NewKeeper(func(key string) *zap.Logger {
+		return zf.options.Load().(*Options).newZapLogger(key)
+	})
 	return zf
 }
 
@@ -37,19 +40,7 @@ func (z *zapFactory) level(name string) logging.Level {
 }
 
 func (z *zapFactory) zap(name string) *zap.Logger {
-	zc := z.zlCache.Load().(map[string]*zap.Logger)
-	zl, ok := zc[name]
-	if ok {
-		return zl
-	}
-	zl = z.options.Load().(*Options).newZapLogger(name)
-	newZc := make(map[string]*zap.Logger, len(zc)+1)
-	for k, v := range zc {
-		newZc[k] = v
-	}
-	newZc[name] = zl
-	z.zlCache.Store(newZc)
-	return zl
+	return z.zlCache.Get(name)
 }
 
 func (z *zapFactory) SwitchOptions(options *Options) {
@@ -57,11 +48,6 @@ func (z *zapFactory) SwitchOptions(options *Options) {
 		return
 	}
 	options = options.Defaulted()
-	zc := z.zlCache.Load().(map[string]*zap.Logger)
-	newZc := make(map[string]*zap.Logger, len(zc))
-	for name := range zc {
-		newZc[name] = options.newZapLogger(name)
-	}
 	z.options.Store(options)
-	z.zlCache.Store(newZc)
+	z.zlCache.Clear()
 }

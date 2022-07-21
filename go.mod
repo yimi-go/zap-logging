@@ -4,7 +4,8 @@ go 1.18
 
 require (
 	github.com/stretchr/testify v1.8.0
-	github.com/yimi-go/logging v0.0.0-20220720045116-f992219f3d25
+	github.com/yimi-go/keeper v0.0.1
+	github.com/yimi-go/logging v0.0.1
 	go.uber.org/atomic v1.9.0
 	go.uber.org/zap v1.21.0
 )
