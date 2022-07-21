@@ -27,6 +27,7 @@ func (z *zapFactory) Logger(name string) logging.Logger {
 	return &zapLogger{
 		name:    name,
 		factory: z,
+		fields:  z.options.Load().(*Options).globalFields,
 	}
 }
 

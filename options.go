@@ -69,7 +69,7 @@ type Options struct {
 	Development bool `json:"development,omitempty"        yaml:"development,omitempty"`
 	// TimeLayout is log time field formatting layout. "2006-01-02 15:04:05.000" as default.
 	TimeLayout string `json:"time_layout,omitempty"        yaml:"time_layout,omitempty"`
-	// FieldKeys is names of fixed log fields.
+	// FieldKeys is names of fixed log globalFields.
 	FieldKeys FieldKeys `json:"field_keys,omitempty"         yaml:"field_keys,omitempty"`
 	// DisableCaller indicates whether disable log caller field. False as default.
 	DisableCaller bool `json:"disable_caller,omitempty"     yaml:"disable_caller,omitempty"`
@@ -83,6 +83,7 @@ type Options struct {
 	ErrorOutputPaths []string `json:"error_output_paths,omitempty" yaml:"error_output_paths,omitempty,flow"`
 
 	addCallerSkipExtra int
+	globalFields       []logging.Field
 }
 
 // Defaulted returns a new Options filling blank items with default values.
@@ -99,6 +100,7 @@ func (o *Options) Defaulted() *Options {
 		OutputPaths:        []string{"stdout"},
 		ErrorOutputPaths:   []string{"stderr"},
 		addCallerSkipExtra: o.addCallerSkipExtra,
+		globalFields:       o.globalFields,
 	}
 	for name, level := range o.Levels {
 		res.Levels[name] = level
@@ -256,6 +258,13 @@ func ErrorOutputPaths(path ...string) Option {
 func AddCallerSkipExtra(extra int) Option {
 	return func(o *Options) {
 		o.addCallerSkipExtra = extra
+	}
+}
+
+// GlobalFields returns an Option that sets global preset log fields.
+func GlobalFields(fields ...logging.Field) Option {
+	return func(o *Options) {
+		o.globalFields = fields
 	}
 }
 

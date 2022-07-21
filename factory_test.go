@@ -41,7 +41,8 @@ func TestNewFactory(t *testing.T) {
 }
 
 func Test_zapFactory_Logger(t *testing.T) {
-	factory := NewFactory(nil)
+	field := logging.String("foo", "bar")
+	factory := NewFactory(NewOptions(GlobalFields(field)))
 	type args struct {
 		name string
 	}
@@ -58,7 +59,7 @@ func Test_zapFactory_Logger(t *testing.T) {
 				name: "test",
 			},
 			want: &zapLogger{
-				fields:  nil,
+				fields:  []logging.Field{field},
 				name:    "test",
 				factory: factory,
 			},

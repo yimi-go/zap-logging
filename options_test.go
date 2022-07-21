@@ -113,6 +113,15 @@ func TestAddCallerSkipExtra(t *testing.T) {
 	assert.Equal(t, extra, o.addCallerSkipExtra)
 }
 
+func TestGlobalFields(t *testing.T) {
+	o := &Options{}
+	fields := []logging.Field{
+		logging.String("foo", "bar"),
+	}
+	GlobalFields(fields...)(o)
+	assert.Equal(t, fields, o.globalFields)
+}
+
 func TestNewOptions(t *testing.T) {
 	type args struct {
 		options []Option
