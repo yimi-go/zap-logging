@@ -32,7 +32,7 @@ func TestNewFactory(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := NewFactory(tt.args.options)
+			got := NewFactory(tt.args.options).(*zapFactory)
 			tt.validate(got, t)
 		})
 	}
@@ -40,7 +40,7 @@ func TestNewFactory(t *testing.T) {
 
 func Test_zapFactory_Logger(t *testing.T) {
 	field := logging.String("foo", "bar")
-	factory := NewFactory(NewOptions(GlobalFields(field)))
+	factory := NewFactory(NewOptions(GlobalFields(field))).(*zapFactory)
 	type args struct {
 		name string
 	}
@@ -73,7 +73,7 @@ func Test_zapFactory_Logger(t *testing.T) {
 }
 
 func Test_zapFactory_zap(t *testing.T) {
-	factory := NewFactory(nil)
+	factory := NewFactory(nil).(*zapFactory)
 	root := factory.zap("")
 	if root == nil {
 		t.Errorf("zapFactory.zap() root is nil")
@@ -89,7 +89,7 @@ func Test_zapFactory_zap(t *testing.T) {
 }
 
 func Test_zapFactory_SwitchOptions(t *testing.T) {
-	factory := NewFactory(nil)
+	factory := NewFactory(nil).(*zapFactory)
 	o1 := factory.options.Load()
 	_ = factory.zap("")
 	factory.SwitchOptions(nil)

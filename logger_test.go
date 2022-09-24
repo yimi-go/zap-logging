@@ -18,7 +18,7 @@ func prepareZapFactory(name string, level logging.Level, opts ...Option) (*zapFa
 	for _, o := range opts {
 		o(options)
 	}
-	factory := NewFactory(options)
+	factory := NewFactory(options).(*zapFactory)
 	origin := os.Stdout
 	defer func() {
 		os.Stdout = origin

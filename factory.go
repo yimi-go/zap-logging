@@ -12,7 +12,7 @@ type zapFactory struct {
 	zlCache keeper.Keeper[string, *zap.Logger]
 }
 
-func NewFactory(options *Options) *zapFactory {
+func NewFactory(options *Options) logging.Factory {
 	if options == nil {
 		options = NewOptions()
 	}
