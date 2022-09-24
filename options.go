@@ -144,7 +144,7 @@ func Levels(levels map[string]logging.Level) Option {
 	}
 }
 
-// Development returns an Option that set whether use development profile.
+// Development returns an Option that set whether we use development profile.
 func Development(dev bool) Option {
 	return func(o *Options) {
 		o.Development = dev
