@@ -8,8 +8,8 @@ import (
 )
 
 type zapFactory struct {
-	options atomic.Value
 	zlCache keeper.Keeper[string, *zap.Logger]
+	options atomic.Value
 }
 
 func NewFactory(options *Options) logging.Factory {

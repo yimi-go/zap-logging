@@ -36,9 +36,9 @@ func Test_mapZapField(t *testing.T) {
 		field logging.Field
 	}
 	tests := []struct {
-		name string
-		args args
 		want zapcore.Field
+		args args
+		name string
 	}{
 		{
 			name: "binary",

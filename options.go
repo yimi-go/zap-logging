@@ -63,26 +63,29 @@ func (f FieldKeys) Defaulted() FieldKeys {
 // Options is zap logger options.
 type Options struct {
 	// Levels is the minimum enabled logging levels, mapped by logger names.
-	Levels map[string]logging.Level `json:"levels,omitempty"             yaml:"levels,omitempty,flow"`
-	// Development indicates if we are in development environment. False as default.
-	Development bool `json:"development,omitempty"        yaml:"development,omitempty"`
-	// TimeLayout is log time field formatting layout. "2006-01-02 15:04:05.000" as default.
-	TimeLayout string `json:"time_layout,omitempty"        yaml:"time_layout,omitempty"`
+	Levels map[string]logging.Level `json:"levels,omitempty" yaml:"levels,omitempty,flow"`
+	// AddCallerSkipAdjusts is the adjustment for adjusting caller skips of caller annotation of specific logger.
+	AddCallerSkipAdjusts map[string]int `json:"add_caller_skip_adjusts,omitempty" yaml:"add_caller_skip_adjusts,omitempty"`
 	// FieldKeys is names of fixed log globalFields.
-	FieldKeys FieldKeys `json:"field_keys,omitempty"         yaml:"field_keys,omitempty"`
+	FieldKeys FieldKeys `json:"field_keys,omitempty" yaml:"field_keys,omitempty"`
+	// TimeLayout is log time field formatting layout. "2006-01-02 15:04:05.000" as default.
+	TimeLayout string `json:"time_layout,omitempty" yaml:"time_layout,omitempty"`
+	// OutputPaths is user log output paths. ["stdout"] as default.
+	OutputPaths []string `json:"output_paths,omitempty" yaml:"output_paths,omitempty,flow"`
+	// ErrorOutputPaths is log's error output path. ["stderr"] as default.
+	ErrorOutputPaths []string `json:"error_output_paths,omitempty" yaml:"error_output_paths,omitempty,flow"`
+	globalFields     []logging.Field
+	// GlobalAddCallerSkipAdjust is the global adjustment for adjusting caller skips of caller annotation.
+	// This effects all loggers.
+	GlobalAddCallerSkipAdjust int `json:"global_add_caller_skip_adjust,omitempty" yaml:"global_add_caller_skip_adjust,omitempty"`
+	// Development indicates if we are in development environment. False as default.
+	Development bool `json:"development,omitempty" yaml:"development,omitempty"`
 	// DisableCaller indicates whether disable log caller field. False as default.
-	DisableCaller bool `json:"disable_caller,omitempty"     yaml:"disable_caller,omitempty"`
+	DisableCaller bool `json:"disable_caller,omitempty" yaml:"disable_caller,omitempty"`
 	// DisableStacktrace indicates whether disable stacktrace field of error level logs. False as default.
 	DisableStacktrace bool `json:"disable_stacktrace,omitempty" yaml:"disable_stacktrace,omitempty"`
 	// DisableLogger indicates whether disable logger field. False as default.
-	DisableLogger bool `json:"disable_logger,omitempty"     yaml:"disable_logger,omitempty"`
-	// OutputPaths is user log output paths. ["stdout"] as default.
-	OutputPaths []string `json:"output_paths,omitempty"       yaml:"output_paths,omitempty,flow"`
-	// ErrorOutputPaths is log's error output path. ["stderr"] as default.
-	ErrorOutputPaths []string `json:"error_output_paths,omitempty" yaml:"error_output_paths,omitempty,flow"`
-
-	addCallerSkipExtra int
-	globalFields       []logging.Field
+	DisableLogger bool `json:"disable_logger,omitempty" yaml:"disable_logger,omitempty"`
 }
 
 // Defaulted returns a new Options filling blank items with default values.
@@ -91,15 +94,16 @@ func (o *Options) Defaulted() *Options {
 		Levels: map[string]logging.Level{
 			"": logging.InfoLevel,
 		},
-		Development:        o.Development,
-		TimeLayout:         "2006-01-02 15:04:05.000",
-		DisableCaller:      o.DisableCaller,
-		DisableStacktrace:  o.DisableStacktrace,
-		DisableLogger:      o.DisableLogger,
-		OutputPaths:        []string{"stdout"},
-		ErrorOutputPaths:   []string{"stderr"},
-		addCallerSkipExtra: o.addCallerSkipExtra,
-		globalFields:       o.globalFields,
+		Development:               o.Development,
+		TimeLayout:                "2006-01-02 15:04:05.000",
+		DisableCaller:             o.DisableCaller,
+		DisableStacktrace:         o.DisableStacktrace,
+		DisableLogger:             o.DisableLogger,
+		OutputPaths:               []string{"stdout"},
+		ErrorOutputPaths:          []string{"stderr"},
+		GlobalAddCallerSkipAdjust: o.GlobalAddCallerSkipAdjust,
+		AddCallerSkipAdjusts:      map[string]int{},
+		globalFields:              o.globalFields,
 	}
 	for name, level := range o.Levels {
 		res.Levels[name] = level
@@ -128,6 +132,9 @@ func (o *Options) Defaulted() *Options {
 	}
 	if len(errorOutputPaths) != 0 {
 		res.ErrorOutputPaths = errorOutputPaths
+	}
+	for name, adj := range o.AddCallerSkipAdjusts {
+		res.AddCallerSkipAdjusts[name] = adj
 	}
 	return res
 }
@@ -253,10 +260,17 @@ func ErrorOutputPaths(path ...string) Option {
 	}
 }
 
-// AddCallerSkipExtra returns an Option that sets extra caller stack skips.
-func AddCallerSkipExtra(extra int) Option {
+// GlobalAddCallerSkipAdjust returns an Option that sets global caller skips adjustment.
+func GlobalAddCallerSkipAdjust(adjustment int) Option {
 	return func(o *Options) {
-		o.addCallerSkipExtra = extra
+		o.GlobalAddCallerSkipAdjust = adjustment
+	}
+}
+
+// AddCallerSkipAdjust returns an Option that sets caller skips adjustment of logger name.
+func AddCallerSkipAdjust(name string, adjustment int) Option {
+	return func(o *Options) {
+		o.AddCallerSkipAdjusts[name] = adjustment
 	}
 }
 
@@ -316,7 +330,8 @@ func (o *Options) newZapLogger(name string) *zap.Logger {
 	l, _ := loggerConfig.Build(
 		zap.AddStacktrace(zapcore.ErrorLevel),
 		zap.AddCallerSkip(1),
-		zap.AddCallerSkip(o.addCallerSkipExtra),
+		zap.AddCallerSkip(o.GlobalAddCallerSkipAdjust),
+		zap.AddCallerSkip(o.AddCallerSkipAdjusts[name]),
 	)
 	if !o.DisableLogger {
 		name = strings.TrimSpace(name)

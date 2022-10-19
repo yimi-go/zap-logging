@@ -105,11 +105,18 @@ func TestErrorOutputPaths(t *testing.T) {
 	assert.Equal(t, path, o.ErrorOutputPaths)
 }
 
-func TestAddCallerSkipExtra(t *testing.T) {
+func TestGlobalAddCallerSkipAdjust(t *testing.T) {
 	o := &Options{}
 	extra := 2
-	AddCallerSkipExtra(extra)(o)
-	assert.Equal(t, extra, o.addCallerSkipExtra)
+	GlobalAddCallerSkipAdjust(extra)(o)
+	assert.Equal(t, extra, o.GlobalAddCallerSkipAdjust)
+}
+
+func TestAddCallerSkipAdjust(t *testing.T) {
+	o := &Options{AddCallerSkipAdjusts: map[string]int{}}
+	adj := 2
+	AddCallerSkipAdjust("foo", adj)(o)
+	assert.Equal(t, adj, o.AddCallerSkipAdjusts["foo"])
 }
 
 func TestGlobalFields(t *testing.T) {
@@ -126,9 +133,9 @@ func TestNewOptions(t *testing.T) {
 		options []Option
 	}
 	tests := []struct {
+		want *Options
 		name string
 		args args
-		want *Options
 	}{
 		{
 			name: "nil_options",

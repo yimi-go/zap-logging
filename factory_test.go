@@ -12,9 +12,9 @@ func TestNewFactory(t *testing.T) {
 		options *Options
 	}
 	tests := []struct {
-		name     string
 		args     args
 		validate func(f *zapFactory, t *testing.T)
+		name     string
 	}{
 		{
 			name: "nil",
@@ -45,10 +45,10 @@ func Test_zapFactory_Logger(t *testing.T) {
 		name string
 	}
 	tests := []struct {
-		name    string
-		factory *zapFactory
-		args    args
 		want    logging.Logger
+		factory *zapFactory
+		name    string
+		args    args
 	}{
 		{
 			name:    "Logger",
